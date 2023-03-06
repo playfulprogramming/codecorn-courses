@@ -27,6 +27,7 @@ services:
       - './logs/supervisor:/var/www/log/supervisor'
     ports:
       - 8765:80
+      - 8766:8766
     depends_on:
       - mysql
     links:

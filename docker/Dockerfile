@@ -200,6 +200,7 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     sqlite-dev \
     sysstat \
     supervisor \
+    xdg-utils \
     yarn \
     zlib \
     wget
