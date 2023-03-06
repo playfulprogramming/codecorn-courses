@@ -1,0 +1,4 @@
+.env
+proxy/certificates/*
+logs/*
+website/package-lock.json

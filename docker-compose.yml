@@ -1,0 +1,101 @@
+version: '3'
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+volumes:
+    node_modules: ~
+    vendor: ~
+
+services:
+
+### Server #########################################
+  website:
+    container_name: ${APP_NAME}-website
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    environment: 
+      - TZ=${TZ} 
+    volumes:
+      - ./website:/var/www/html
+      - vendor:/var/www/html/vendor
+      - node_modules:/var/www/html/node_modules
+      - './logs/supervisor:/var/www/log/supervisor'
+    ports:
+      - 8765:80
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    networks:
+      - frontend
+      - backend
+    restart: always
+    cap_add:
+      - ALL
+    privileged: true
+
+### MySQL ################################################
+  mysql:
+    container_name: ${APP_NAME}-mysql
+    image: mysql:5.7
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - TZ=${TZ}
+    ports:
+      - 3306:3306
+    # volumes:
+    #   - ./mysql:/var/lib/mysql
+    networks:
+      - backend
+    restart: always
+    cap_add:
+      - ALL
+    privileged: true
+
+# ### PHPMyAdmin #############################################
+  phpmyadmin:
+    container_name: ${APP_NAME}-phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - mysql
+    links:
+      - mysql:db
+    ports:
+      - 9191:80
+    networks:
+      - backend
+      - frontend
+    environment:
+      - MYSQL_USERNAME=${DB_USERNAME}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - PMA_HOST=mysql
+    restart: unless-stopped
+    cap_add:
+      - ALL
+    privileged: true
+
+  # proxy:
+  #     image: nginx
+  #     container_name: "${APP_NAME}-proxy"
+  #     hostname: proxy
+  #     restart: always
+  #     depends_on:
+  #         - website
+  #     volumes:
+  #         - "/etc/timezone:/etc/timezone:ro"
+  #         - "/etc/localtime:/etc/localtime:ro"
+  #         - ./proxy/certificates:/etc/letsencrypt/
+  #     ports:
+  #         - 80:80
+  #         - 443:443
+  #     networks:
+  #         - frontend
+  #         - backend
