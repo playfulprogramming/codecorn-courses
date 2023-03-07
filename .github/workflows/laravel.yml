@@ -1,0 +1,63 @@
+name: Laravel
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  laravel-tests:
+
+    runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./website
+
+    steps:
+    - name: Setup PHP with latest versions
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, bcmath, ctype, fileinfo, openssl, PDO, json, trokenizer, xml, pdo_mysql, pgsql, pdo_pgsql, mysqli, gd, exif, intl, xsl, soap, zip, opcache, pcntl, gmp # Install any required php extensions
+      env:
+        update: true
+
+    - uses: actions/checkout@v3
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+    - name: Install Node Dependencies
+      run: npm install
+
+    - name: Build assets
+      run: npx vite build 
+      
+    - name: Update composer
+      run: composer update
+
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --ignore-platform-reqs
+
+    - name: Generate key
+      run: php artisan key:generate
+
+    - name: Directory Permissions
+      run: chmod -R 777 storage bootstrap/cache
+
+    - name: Create Database
+      run: |
+        mkdir -p database
+        touch database/database.sqlite
+
+    - name: Migrate Database
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+      run: php artisan migrate --no-interaction --force
+
+    - name: Execute tests (Unit and Feature tests) via PHPUnit
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+      run: ./vendor/bin/pest
