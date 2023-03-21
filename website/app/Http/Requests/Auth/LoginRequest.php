@@ -88,10 +88,4 @@ class LoginRequest extends FormRequest
     {
         return Str::transliterate(Str::lower($this->input('email')) . '|' . $this->ip());
     }
-
-    public function authenticated(User $user): void
-    {
-        $user->generateTwoFactorCode();
-        $user->notify(new TwoFactorCode());
-    }
 }

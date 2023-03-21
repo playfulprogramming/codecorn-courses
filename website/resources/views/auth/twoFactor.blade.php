@@ -5,13 +5,13 @@
                 {{ session()->get('message') }}
             </p>
         @endif
-        <form method="POST" action="{{ route('verify.store') }}">
+        <form method="POST" action="{{ route('verify-2fa.store') }}">
             @csrf
             <h1>{{ __('Two Factor Verification')}}</h1>
             <p class="text-muted">
                 {{ __('You have received an email which contains two factor login code.
                                             If you haven\'t received it, press') }}
-                <a class="font-bold text-white" href="{{ route('verify.resend') }}">{{ __('here') }}</a>.
+                <a class="font-bold text-white" href="{{ route('verify-2fa.resend') }}">{{ __('here') }}</a>.
             </p>
 
             <!-- 2fa code -->

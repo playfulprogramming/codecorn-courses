@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
+use App\Support\HasAdvancedFilter;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens;
+    use HasFactory;
+    use HasAdvancedFilter;
+    use SoftDeletes;
+    use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -44,6 +50,26 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'two_factor_expires_at' => 'datetime',
     ];
+
+    public $orderable = [
+        'id',
+        'name',
+        'email',
+        'email_verified_at',
+    ];
+
+    public $filterable = [
+        'id',
+        'name',
+        'email',
+        'email_verified_at',
+        'roles.title',
+    ];
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
 
     /**
      * @comment Generate a two factor code.

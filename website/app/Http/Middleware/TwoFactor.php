@@ -26,8 +26,8 @@ class TwoFactor
                 return redirect()->route('login')
                     ->withMessage('Your two factor code has expired. Please login again.');
             }
-            if (!request()->is('verify*')) {
-                return redirect()->route('verify.index');
+            if (!request()->is('verify-2fa*')) {
+                return redirect()->route('verify-2fa.index');
             }
         }
 
